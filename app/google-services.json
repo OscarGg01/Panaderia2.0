@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "471178752918",
+    "project_id": "panaderia2-deb84",
+    "storage_bucket": "panaderia2-deb84.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:471178752918:android:3208864bd41c307622a3b7",
+        "android_client_info": {
+          "package_name": "com.example.panaderia20"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCquMHJBs_werBsfJf8DanJoDOd-dww-rg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
