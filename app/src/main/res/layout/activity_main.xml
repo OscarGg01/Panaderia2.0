@@ -11,18 +11,59 @@
     <!-- 1. Título de la Aplicación -->
     <TextView
         android:id="@+id/app_title"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="PANADERÍA DELICIA"
-        android:gravity="center"
+        android:fontFamily="sans-serif-medium"
         android:textSize="24sp"
         android:textStyle="bold"
-        android:padding="16dp"
-        android:background="#FFF4E6"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
         android:textColor="#5E4134"
+        android:background="#FFF4E6"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/go_to_profile_button"
+        app:layout_constraintBottom_toBottomOf="@id/cart_button" />
+
+    <!-- BOTÓN DEL CARRITO (Nuevo) -->
+    <ImageButton
+        android:id="@+id/cart_button"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:src="@drawable/ic_shopping_cart"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="Ver Carrito"
+        android:layout_marginEnd="8dp"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- BOTÓN DE PERFIL (Ahora a la izquierda del carrito) -->
+    <ImageButton
+        android:id="@+id/go_to_profile_button"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:src="@drawable/ic_profile"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="Ver Perfil"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="@id/cart_button"
+        app:layout_constraintBottom_toBottomOf="@id/cart_button"
+        app:layout_constraintEnd_toStartOf="@id/cart_button" />
+
+    <!-- BOTÓN DE LOGIN (En la misma posición que el de perfil) -->
+    <TextView
+        android:id="@+id/go_to_login_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Iniciar Sesión"
+        android:gravity="center"
+        android:visibility="visible"
+        android:textColor="#5E4134"
+        android:padding="8dp"
+        app:layout_constraintTop_toTopOf="@id/go_to_profile_button"
+        app:layout_constraintBottom_toBottomOf="@id/go_to_profile_button"
+        app:layout_constraintEnd_toEndOf="@id/go_to_profile_button" />
 
     <!-- 1.1. BUSCADOR -->
     <EditText

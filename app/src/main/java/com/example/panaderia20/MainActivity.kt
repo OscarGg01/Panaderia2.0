@@ -1,5 +1,6 @@
 package com.example.panaderia20
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -11,9 +12,6 @@ import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.animation.with
-import androidx.compose.ui.semantics.dismiss
-import androidx.compose.ui.semantics.text
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -21,6 +19,10 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.firebase.firestore.FirebaseFirestore
 import java.util.Locale
 import android.widget.Button
+import android.content.Intent
+import android.widget.ImageButton
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.firebase.auth.FirebaseAuth
 
 class MainActivity : AppCompatActivity() {
 
@@ -28,6 +30,12 @@ class MainActivity : AppCompatActivity() {
     private lateinit var productAdapter: ProductAdapter
     private lateinit var searchEditText: EditText
     private lateinit var progressBar: ProgressBar
+
+    private lateinit var auth: FirebaseAuth
+    private lateinit var firestore: FirebaseFirestore
+
+    private lateinit var goToLoginButton: TextView
+    private lateinit var goToProfileButton: ImageButton
 
     // Listas para la gestión de datos
     private val fullProductList = mutableListOf<Product>()
@@ -40,27 +48,69 @@ class MainActivity : AppCompatActivity() {
     // Mapa para gestionar los botones de filtro
     private lateinit var filterButtons: Map<String, View>
 
+    @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // Inicializar vistas
+        // --- Inicialización de Firebase ---
+        auth = FirebaseAuth.getInstance()
+        firestore = FirebaseFirestore.getInstance()
+
+        // --- Vinculación de Vistas ---
         recyclerView = findViewById(R.id.products_recycler_view)
         searchEditText = findViewById(R.id.search_edittext)
         progressBar = findViewById(R.id.progress_bar)
 
-        // Configurar RecyclerView
+        // Vinculamos los botones de la clase, no variables locales
+        goToLoginButton = findViewById(R.id.go_to_login_button)
+        goToProfileButton = findViewById(R.id.go_to_profile_button)
+
+        // --- Configuración del RecyclerView ---
         recyclerView.layoutManager = GridLayoutManager(this, 2)
-        productAdapter = ProductAdapter(productList) { product -> showProductDetail(product)
+        productAdapter = ProductAdapter(productList) { product ->
+            showProductDetail(product)
         }
         recyclerView.adapter = productAdapter
 
-        // Configurar listeners
+        // --- Configuración de Listeners ---
         setupFilterButtons()
         setupSearchListener()
 
-        // Cargar productos
+        // Listener para el botón de Iniciar Sesión
+        goToLoginButton.setOnClickListener {
+            val intent = Intent(this, LoginActivity::class.java)
+            startActivity(intent)
+        }
+
+        // Listener para el botón de Perfil
+        goToProfileButton.setOnClickListener {
+            val intent = Intent(this, ProfileActivity::class.java)
+            startActivity(intent)
+        }
+
+        // --- Carga de Datos Inicial ---
         loadProducts()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Cada vez que la actividad vuelve a primer plano,
+        // comprobamos el estado de la sesión.
+        updateUI()
+    }
+
+    private fun updateUI() {
+        val user = auth.currentUser
+        if (user != null) {
+            // Usuario está logueado: muestra el botón de perfil y oculta el de login
+            goToProfileButton.visibility = View.VISIBLE
+            goToLoginButton.visibility = View.GONE
+        } else {
+            // Usuario NO está logueado: muestra el botón de login y oculta el de perfil
+            goToProfileButton.visibility = View.GONE
+            goToLoginButton.visibility = View.VISIBLE
+        }
     }
 
     private fun loadProducts() {
