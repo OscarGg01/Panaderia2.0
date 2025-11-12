@@ -1,17 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_margin="8dp"
     app:cardCornerRadius="12dp"
     app:cardElevation="4dp"
     app:cardBackgroundColor="#BE9B7B">
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/product_card_container"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="?android:attr/selectableItemBackground">
 
         <!-- 1. Imagen del Producto -->
         <ImageView
@@ -47,7 +51,7 @@
                 android:ellipsize="end"
                 android:textColor="@color/black"/>
 
-            <!-- 3. Descripción (Opcional, para más detalle) -->
+            <!-- 3. Descripción -->
             <TextView
                 android:id="@+id/product_description"
                 android:layout_width="match_parent"
@@ -72,16 +76,38 @@
                 android:textColor="#6E4E3A"
                 android:layout_marginTop="4dp"/>
 
-            <!-- 5. Precio -->
-            <TextView
-                android:id="@+id/product_price"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="$ 0.00"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:textColor="#4E2F29"
-                android:layout_marginTop="8dp"/>
+                android:orientation="horizontal"
+                android:layout_marginTop="8dp"
+                android:gravity="center_vertical">
+
+                <!-- 5. Precio -->
+                <TextView
+                    android:id="@+id/product_price"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textColor="#4E2F29"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    tools:text="$ 0.00" />
+
+                <!-- 6. BOTÓN DE CARRITO -->
+                <ImageView
+                    android:id="@+id/add_to_cart_button"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:clickable="true"
+                    android:contentDescription="Añadir al carrito"
+                    android:focusable="true"
+                    android:padding="8dp"
+                    android:src="@drawable/ic_add_to_cart"
+                    app:tint="#4E2F29" />
+
+            </LinearLayout>
 
         </LinearLayout>
 

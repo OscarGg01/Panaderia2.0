@@ -24,6 +24,137 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
+    <!-- 1.1. BUSCADOR -->
+    <EditText
+        android:id="@+id/search_edittext"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:background="@drawable/search_background"
+        android:hint="Buscar por nombre o tipo..."
+        android:padding="12dp"
+        android:maxLines="1"
+        android:inputType="text"
+        app:layout_constraintTop_toBottomOf="@id/app_title"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- 1.2. CONTENEDOR DE FILTROS (NUEVO) -->
+    <LinearLayout
+        android:id="@+id/filters_container"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="16dp"
+        android:gravity="center"
+        app:layout_constraintTop_toBottomOf="@id/search_edittext"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <!-- Filtro Saludable -->
+        <LinearLayout
+            android:id="@+id/filter_healthy"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:padding="8dp"
+            android:background="@drawable/filter_background"
+            android:clickable="true"
+            android:focusable="true">
+            <ImageView
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:src="@drawable/ic_filter_healthy"
+                app:tint="@color/filter_icon_tint" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Saludable"
+                android:textSize="12sp"
+                android:textColor="@color/filter_text_color" />
+        </LinearLayout>
+
+        <!-- Filtro Dulce -->
+        <LinearLayout
+            android:id="@+id/filter_sweet"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:padding="8dp"
+            android:background="@drawable/filter_background"
+            android:clickable="true"
+            android:focusable="true">
+            <ImageView
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:src="@drawable/ic_filter_sweet"
+                app:tint="@color/filter_icon_tint" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Dulce"
+                android:textSize="12sp"
+                android:textColor="@color/filter_text_color" />
+        </LinearLayout>
+
+        <!-- Filtro Artesanal -->
+        <LinearLayout
+            android:id="@+id/filter_artisan"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:padding="8dp"
+            android:background="@drawable/filter_background"
+            android:clickable="true"
+            android:focusable="true">
+            <ImageView
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:src="@drawable/ic_filter_artisan"
+                app:tint="@color/filter_icon_tint" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Artesanal"
+                android:textSize="12sp"
+                android:textColor="@color/filter_text_color" />
+        </LinearLayout>
+
+        <!-- Filtro Bebida -->
+        <LinearLayout
+            android:id="@+id/filter_drink"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:padding="8dp"
+            android:background="@drawable/filter_background"
+            android:clickable="true"
+            android:focusable="true">
+            <ImageView
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:src="@drawable/ic_filter_drink"
+                app:tint="@color/filter_icon_tint" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Bebida"
+                android:textSize="12sp"
+                android:textColor="@color/filter_text_color" />
+        </LinearLayout>
+
+    </LinearLayout>
+
     <!-- 2. RecyclerView para mostrar los productos -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/products_recycler_view"
@@ -31,7 +162,7 @@
         android:layout_height="0dp"
         android:layout_marginTop="16dp"
         android:padding="4dp"
-        app:layout_constraintTop_toBottomOf="@id/app_title"
+        app:layout_constraintTop_toBottomOf="@id/filters_container"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"

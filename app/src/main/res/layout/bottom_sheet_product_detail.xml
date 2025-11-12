@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="#FFF4E6"
+    android:padding="16dp">
+
+    <!-- Imagen del Producto -->
+    <ImageView
+        android:id="@+id/detail_product_image"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:scaleType="fitCenter"
+        android:layout_marginBottom="16dp"
+        tools:src="@tools:sample/avatars" />
+
+    <!-- Nombre Completo del Producto -->
+    <TextView
+        android:id="@+id/detail_product_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:textColor="#5E4134"
+        tools:text="Nombre Muy Largo del Producto Artesanal" />
+
+    <!-- Descripción Completa del Producto -->
+    <TextView
+        android:id="@+id/detail_product_description"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:textSize="16sp"
+        android:textColor="#363636"
+        tools:text="Esta es una descripción mucho más larga y detallada del producto para que el usuario pueda leer absolutamente todo sobre sus ingredientes, preparación y origen." />
+
+    <!-- Contenedor para Precio y Botón de Carrito -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp">
+
+        <!-- Precio -->
+        <TextView
+            android:id="@+id/detail_product_price"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="#4E2F29"
+            tools:text="$ 15.50" />
+
+        <!-- Botón de Añadir al Carrito -->
+        <Button
+            android:id="@+id/detail_add_to_cart_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:text="Añadir al carrito"
+            app:icon="@drawable/ic_add_to_cart"
+            android:backgroundTint="#5E4134" />
+    </RelativeLayout>
+
+</LinearLayout>

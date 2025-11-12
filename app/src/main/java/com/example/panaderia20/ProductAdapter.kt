@@ -5,11 +5,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import java.util.Locale
 
-class ProductAdapter(private val products: List<Product>) :
+class ProductAdapter(private val products: List<Product>, private val onProductClick: (Product) -> Unit) :
     RecyclerView.Adapter<ProductAdapter.ProductViewHolder>() {
 
     // Define el ViewHolder que contiene las vistas de cada item.
@@ -20,6 +22,8 @@ class ProductAdapter(private val products: List<Product>) :
         val image: ImageView = itemView.findViewById(R.id.product_image)
         val stockStatus: TextView = itemView.findViewById(R.id.stock_status)
         val type: TextView = itemView.findViewById(R.id.product_type)
+        val addToCartButton: ImageView = itemView.findViewById(R.id.add_to_cart_button)
+        val productCard: ConstraintLayout = itemView.findViewById(R.id.product_card_container)
     }
 
     // Crea nuevos ViewHolders (llamado por el layout manager)
@@ -55,6 +59,17 @@ class ProductAdapter(private val products: List<Product>) :
         holder.itemView.setOnClickListener {
             // Aquí puedes implementar la navegación a la pantalla de detalle.
             // Por ejemplo: Toast.makeText(it.context, "Detalle de ${product.nombre}", Toast.LENGTH_SHORT).show()
+        }
+
+        // 1. Clic en el botón del carrito (dentro de la tarjeta)
+        holder.addToCartButton.setOnClickListener {
+            // Por ahora, solo mostramos un mensaje
+            Toast.makeText(holder.itemView.context, "${product.nombre} añadido (funcionalidad pendiente)", Toast.LENGTH_SHORT).show()
+        }
+
+        // 2. Clic en la tarjeta completa
+        holder.productCard.setOnClickListener {
+            onProductClick(product) // Llamamos a la lambda que pasamos al constructor
         }
     }
 
