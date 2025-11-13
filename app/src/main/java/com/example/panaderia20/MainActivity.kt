@@ -15,7 +15,6 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.ui.semantics.text
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -31,25 +30,16 @@ class MainActivity : AppCompatActivity() {
     private lateinit var productAdapter: ProductAdapter
     private lateinit var searchEditText: EditText
     private lateinit var progressBar: ProgressBar
-
     private lateinit var cartButton: ImageButton
-    private lateinit var cartBadge: TextView // <-- NUEVO: Referencia al contador
-
+    private lateinit var cartBadge: TextView
     private lateinit var auth: FirebaseAuth
     private lateinit var firestore: FirebaseFirestore
-
     private lateinit var goToLoginButton: TextView
     private lateinit var goToProfileButton: ImageButton
-
-    // Listas para la gestión de datos
     private val fullProductList = mutableListOf<Product>()
-    private val productList = mutableListOf<Product>() // Lista que usa el adaptador
-
-    // Variables para gestionar los filtros
+    private val productList = mutableListOf<Product>()
     private var currentSearchQuery: String = ""
     private var activeCategoryFilter: String? = null
-
-    // Mapa para gestionar los botones de filtro
     private lateinit var filterButtons: Map<String, View>
 
     @SuppressLint("MissingInflatedId")
@@ -58,7 +48,6 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // --- Inicialización de Firebase ---
         auth = FirebaseAuth.getInstance()
         if (auth.currentUser != null) {
             CartManager.loadCart(this)
@@ -84,17 +73,16 @@ class MainActivity : AppCompatActivity() {
         // --- Configuración de Listeners ---
         setupFilterButtons()
         setupSearchListener()
-        setupClickListeners() // <-- NUEVO: Agrupamos los listeners de botones
+        setupClickListeners()
 
         // --- Carga de Datos Inicial ---
         loadProducts()
-        observeCart() // <-- NUEVO: Empezamos a observar el carrito
+        observeCart()
     }
 
     override fun onResume() {
         super.onResume()
         updateUI()
-        // Actualiza el contador por si el carrito cambió en otra pantalla
         updateCartBadge(CartManager.cartItems.value?.size ?: 0)
     }
 
@@ -109,9 +97,9 @@ class MainActivity : AppCompatActivity() {
     // NUEVO: Actualiza la visibilidad y el texto del contador
     private fun updateCartBadge(count: Int) {
         if (count == 0) {
-            cartBadge.visibility = View.GONE // Oculta el contador si el carrito está vacío
+            cartBadge.visibility = View.GONE
         } else {
-            cartBadge.visibility = View.VISIBLE // Muéstralo si hay productos
+            cartBadge.visibility = View.VISIBLE
             cartBadge.text = count.toString()
         }
     }

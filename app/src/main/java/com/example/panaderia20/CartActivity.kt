@@ -24,8 +24,8 @@ class CartActivity : AppCompatActivity() {
     // Vistas para la sección de resumen
     private lateinit var summarySection: LinearLayout
     private lateinit var totalPriceText: TextView
-    private lateinit var addMoreProductsButton: Button // CORREGIDO: Tipo de botón correcto
-    private lateinit var continuePurchaseButton: Button // CORREGIDO: Tipo de botón correcto
+    private lateinit var addMoreProductsButton: Button
+    private lateinit var continuePurchaseButton: Button
 
     @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -65,9 +65,17 @@ class CartActivity : AppCompatActivity() {
             finish() // Cierra la actividad del carrito
         }
 
+        // --- LÓGICA ACTUALIZADA ---
         continuePurchaseButton.setOnClickListener {
-            // Funcionalidad futura
-            Toast.makeText(this, "Función de pago no implementada aún", Toast.LENGTH_SHORT).show()
+            // Comprueba si el carrito tiene productos antes de continuar
+            if (CartManager.cartItems.value?.isNotEmpty() == true) {
+                // Si hay productos, inicia la CheckoutActivity
+                val intent = Intent(this, CheckoutActivity::class.java)
+                startActivity(intent)
+            } else {
+                // Si por alguna razón el botón es visible pero el carrito está vacío, muestra un mensaje
+                Toast.makeText(this, "Tu carrito está vacío", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
@@ -102,15 +110,13 @@ class CartActivity : AppCompatActivity() {
                 summarySection.visibility = View.VISIBLE
 
                 // Calcula el precio total sumando el (precio * cantidad) de cada item
-                for (item in itemsList) {
-                    totalPrice += item.precio * item.cantidad
-                }
+                totalPrice = itemsList.sumOf { it.precio * it.cantidad }
             }
 
             // Actualiza la lista en el adaptador
             cartAdapter.updateItems(itemsList)
             // Actualiza el texto del precio total
-            totalPriceText.text = "S/. ${String.format("%.2f", totalPrice)}"
+            totalPriceText.text = String.format("S/. %.2f", totalPrice)
         }
     }
 }
