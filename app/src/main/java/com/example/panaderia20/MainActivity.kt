@@ -1,28 +1,28 @@
 package com.example.panaderia20
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
 import android.view.View
+import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageButton
 import android.widget.ImageView
-import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.ui.semantics.text
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import java.util.Locale
-import android.widget.Button
-import android.content.Intent
-import android.widget.ImageButton
-import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.firebase.auth.FirebaseAuth
 
 class MainActivity : AppCompatActivity() {
 
@@ -30,6 +30,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var productAdapter: ProductAdapter
     private lateinit var searchEditText: EditText
     private lateinit var progressBar: ProgressBar
+
+    private lateinit var cartButton: ImageButton
+    private lateinit var cartBadge: TextView // <-- NUEVO: Referencia al contador
 
     private lateinit var auth: FirebaseAuth
     private lateinit var firestore: FirebaseFirestore
@@ -55,20 +58,23 @@ class MainActivity : AppCompatActivity() {
 
         // --- Inicialización de Firebase ---
         auth = FirebaseAuth.getInstance()
+        if (auth.currentUser != null) {
+            CartManager.loadCart(this)
+        }
         firestore = FirebaseFirestore.getInstance()
 
         // --- Vinculación de Vistas ---
         recyclerView = findViewById(R.id.products_recycler_view)
         searchEditText = findViewById(R.id.search_edittext)
         progressBar = findViewById(R.id.progress_bar)
-
-        // Vinculamos los botones de la clase, no variables locales
         goToLoginButton = findViewById(R.id.go_to_login_button)
         goToProfileButton = findViewById(R.id.go_to_profile_button)
+        cartButton = findViewById(R.id.cart_button)
+        cartBadge = findViewById(R.id.cart_badge) // <-- NUEVO: Vinculamos el contador
 
         // --- Configuración del RecyclerView ---
         recyclerView.layoutManager = GridLayoutManager(this, 2)
-        productAdapter = ProductAdapter(productList) { product ->
+        productAdapter = ProductAdapter(this, productList) { product ->
             showProductDetail(product)
         }
         recyclerView.adapter = productAdapter
@@ -76,38 +82,67 @@ class MainActivity : AppCompatActivity() {
         // --- Configuración de Listeners ---
         setupFilterButtons()
         setupSearchListener()
-
-        // Listener para el botón de Iniciar Sesión
-        goToLoginButton.setOnClickListener {
-            val intent = Intent(this, LoginActivity::class.java)
-            startActivity(intent)
-        }
-
-        // Listener para el botón de Perfil
-        goToProfileButton.setOnClickListener {
-            val intent = Intent(this, ProfileActivity::class.java)
-            startActivity(intent)
-        }
+        setupClickListeners() // <-- NUEVO: Agrupamos los listeners de botones
 
         // --- Carga de Datos Inicial ---
         loadProducts()
+        observeCart() // <-- NUEVO: Empezamos a observar el carrito
     }
 
     override fun onResume() {
         super.onResume()
-        // Cada vez que la actividad vuelve a primer plano,
-        // comprobamos el estado de la sesión.
         updateUI()
+        // Actualiza el contador por si el carrito cambió en otra pantalla
+        updateCartBadge(CartManager.cartItems.value?.size ?: 0)
+    }
+
+    // NUEVO: Observa los cambios en el carrito y actualiza el contador
+    private fun observeCart() {
+        CartManager.cartItems.observe(this) { itemsMap ->
+            val uniqueProductCount = itemsMap.size
+            updateCartBadge(uniqueProductCount)
+        }
+    }
+
+    // NUEVO: Actualiza la visibilidad y el texto del contador
+    private fun updateCartBadge(count: Int) {
+        if (count == 0) {
+            cartBadge.visibility = View.GONE // Oculta el contador si el carrito está vacío
+        } else {
+            cartBadge.visibility = View.VISIBLE // Muéstralo si hay productos
+            cartBadge.text = count.toString()
+        }
+    }
+
+    // NUEVO: Agrupamos los listeners para mayor orden
+    private fun setupClickListeners() {
+        goToLoginButton.setOnClickListener {
+            startActivity(Intent(this, LoginActivity::class.java))
+        }
+
+        goToProfileButton.setOnClickListener {
+            startActivity(Intent(this, ProfileActivity::class.java))
+        }
+
+        cartButton.setOnClickListener {
+            handleCartClick()
+        }
+    }
+
+    private fun handleCartClick() {
+        if (auth.currentUser != null) {
+            startActivity(Intent(this, CartActivity::class.java))
+        } else {
+            Toast.makeText(this, "Debes iniciar sesión para ver tu carrito", Toast.LENGTH_SHORT).show()
+            startActivity(Intent(this, LoginActivity::class.java))
+        }
     }
 
     private fun updateUI() {
-        val user = auth.currentUser
-        if (user != null) {
-            // Usuario está logueado: muestra el botón de perfil y oculta el de login
+        if (auth.currentUser != null) {
             goToProfileButton.visibility = View.VISIBLE
             goToLoginButton.visibility = View.GONE
         } else {
-            // Usuario NO está logueado: muestra el botón de login y oculta el de perfil
             goToProfileButton.visibility = View.GONE
             goToLoginButton.visibility = View.VISIBLE
         }
@@ -115,8 +150,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun loadProducts() {
         progressBar.visibility = View.VISIBLE
-        val db = FirebaseFirestore.getInstance()
-        db.collection("product")
+        firestore.collection("product")
             .get()
             .addOnSuccessListener { result ->
                 fullProductList.clear()
@@ -136,7 +170,7 @@ class MainActivity : AppCompatActivity() {
                         Log.e("MainActivity", "Error al parsear documento: ${document.id}", e)
                     }
                 }
-                applyFilters() // Aplicar filtros iniciales (ninguno)
+                applyFilters()
                 progressBar.visibility = View.GONE
             }
             .addOnFailureListener { exception ->
@@ -155,13 +189,7 @@ class MainActivity : AppCompatActivity() {
 
         filterButtons.forEach { (category, view) ->
             view.setOnClickListener {
-                // Si el filtro presionado ya estaba activo, se desactiva.
-                if (activeCategoryFilter == category) {
-                    activeCategoryFilter = null
-                } else {
-                    // Si no, se activa el nuevo filtro.
-                    activeCategoryFilter = category
-                }
+                activeCategoryFilter = if (activeCategoryFilter == category) null else category
                 updateFilterButtonsUI()
                 applyFilters()
             }
@@ -186,28 +214,22 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun applyFilters() {
-        // 1. Empezar con la lista completa
-        var filteredList = fullProductList
+        var filteredList = fullProductList.asSequence()
 
-        // 2. Aplicar filtro de categoría si existe
         activeCategoryFilter?.let { category ->
-            filteredList = filteredList.filter { product ->
-                product.tipo.equals(category, ignoreCase = true)
-            }.toMutableList()
+            filteredList = filteredList.filter { it.tipo.equals(category, ignoreCase = true) }
         }
 
-        // 3. Aplicar filtro de búsqueda si existe
         if (currentSearchQuery.isNotEmpty()) {
             val lowerCaseQuery = currentSearchQuery.toLowerCase(Locale.getDefault())
-            filteredList = filteredList.filter { product ->
-                product.nombre.toLowerCase(Locale.getDefault()).contains(lowerCaseQuery) ||
-                        product.tipo.toLowerCase(Locale.getDefault()).contains(lowerCaseQuery)
-            }.toMutableList()
+            filteredList = filteredList.filter {
+                it.nombre.toLowerCase(Locale.getDefault()).contains(lowerCaseQuery) ||
+                        it.tipo.toLowerCase(Locale.getDefault()).contains(lowerCaseQuery)
+            }
         }
 
-        // 4. Actualizar la lista del adaptador y notificar
         productList.clear()
-        productList.addAll(filteredList)
+        productList.addAll(filteredList.toList())
         productAdapter.notifyDataSetChanged()
     }
 
@@ -220,17 +242,22 @@ class MainActivity : AppCompatActivity() {
         val detailName = view.findViewById<TextView>(R.id.detail_product_name)
         val detailDescription = view.findViewById<TextView>(R.id.detail_product_description)
         val detailPrice = view.findViewById<TextView>(R.id.detail_product_price)
-        val detailAddToCartButton = view.findViewById<android.widget.Button>(R.id.detail_add_to_cart_button)
+        val detailAddToCartButton = view.findViewById<Button>(R.id.detail_add_to_cart_button)
+
         detailName.text = product.nombre
         detailDescription.text = product.descripcion
-        detailPrice.text = String.format("$ %.2f", product.precio)
+        detailPrice.text = String.format("S/. %.2f", product.precio)
 
-        Glide.with(this)
-            .load(product.imageUrl)
-            .into(detailImage)
+        Glide.with(this).load(product.imageUrl).into(detailImage)
 
         detailAddToCartButton.setOnClickListener {
-            // Lógica futura del carrito
+            if (auth.currentUser == null) {
+                Toast.makeText(this, "Debes iniciar sesión para añadir productos", Toast.LENGTH_SHORT).show()
+                startActivity(Intent(this, LoginActivity::class.java))
+            } else {
+                CartManager.addProduct(this, product)
+                Toast.makeText(this, "${product.nombre} añadido al carrito", Toast.LENGTH_SHORT).show()
+            }
             dialog.dismiss()
         }
 

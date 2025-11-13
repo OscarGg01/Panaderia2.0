@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <!-- Ítem para iniciar sesión -->
+    <item
+        android:id="@+id/action_login"
+        android:title="Iniciar Sesión"
+        app:showAsAction="ifRoom" />
+
+    <!-- Ítem del carrito con el layout personalizado -->
+    <item
+        android:id="@+id/action_cart"
+        android:title="Carrito"
+        app:showAsAction="always"
+        app:actionLayout="@layout/cart_action_item_layout" /> <!-- ¡LÍNEA CLAVE! -->
+
+</menu>

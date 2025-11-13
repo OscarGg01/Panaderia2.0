@@ -94,6 +94,7 @@ class ProfileActivity : AppCompatActivity() {
     }
 
     private fun logoutUser() {
+        CartManager.clearCart(this)
         auth.signOut()
         Toast.makeText(this, "Sesión cerrada", Toast.LENGTH_SHORT).show()
         goToMainActivity()

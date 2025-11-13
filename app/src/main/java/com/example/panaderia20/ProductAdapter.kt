@@ -1,5 +1,7 @@
 package com.example.panaderia20
 
+import android.content.Context
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,9 +11,10 @@ import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.google.firebase.auth.FirebaseAuth
 import java.util.Locale
 
-class ProductAdapter(private val products: List<Product>, private val onProductClick: (Product) -> Unit) :
+class ProductAdapter(private val context: Context, private val products: List<Product>, private val onProductClick: (Product) -> Unit) :
     RecyclerView.Adapter<ProductAdapter.ProductViewHolder>() {
 
     // Define el ViewHolder que contiene las vistas de cada item.
@@ -63,14 +66,27 @@ class ProductAdapter(private val products: List<Product>, private val onProductC
 
         // 1. Clic en el botón del carrito (dentro de la tarjeta)
         holder.addToCartButton.setOnClickListener {
-            // Por ahora, solo mostramos un mensaje
-            Toast.makeText(holder.itemView.context, "${product.nombre} añadido (funcionalidad pendiente)", Toast.LENGTH_SHORT).show()
+            // Ahora llamamos a la función que vamos a corregir
+            addProductToCart(product)
         }
 
         // 2. Clic en la tarjeta completa
         holder.productCard.setOnClickListener {
             onProductClick(product) // Llamamos a la lambda que pasamos al constructor
         }
+    }
+
+    private fun addProductToCart(product: Product) {
+        val auth = FirebaseAuth.getInstance()
+
+        if (auth.currentUser == null) {
+            Toast.makeText(context, "Debes iniciar sesión para añadir productos", Toast.LENGTH_SHORT).show()
+            context.startActivity(Intent(context, LoginActivity::class.java))
+            return
+        }
+
+        CartManager.addProduct(context, product)
+        Toast.makeText(context, "${product.nombre} añadido al carrito", Toast.LENGTH_SHORT).show()
     }
 
     // Devuelve el tamaño de tu dataset (llamado por el layout manager)

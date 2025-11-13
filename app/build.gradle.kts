@@ -101,4 +101,6 @@ dependencies {
             because("La versión 1.13.0+ puede tener dependencias más nuevas")
         }
     }
+
+    implementation("com.google.code.gson:gson:2.10.1")
 }
