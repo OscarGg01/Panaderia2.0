@@ -8,9 +8,9 @@
     android:background="#FFF4E6"
     tools:context=".MainActivity">
 
-    <!-- BARRA SUPERIOR -->
+    <!-- BARRA SUPERIOR CORREGIDA -->
 
-    <!-- Contenedor del Carrito (ahora anclado a la derecha) -->
+    <!-- Contenedor del Carrito (sigue anclado a la derecha) -->
     <FrameLayout
         android:id="@+id/cart_button_container"
         android:layout_width="wrap_content"
@@ -58,7 +58,6 @@
         app:layout_constraintBottom_toBottomOf="@id/cart_button_container"
         app:layout_constraintEnd_toStartOf="@id/cart_button_container" />
 
-    <!-- Botón de Login (en la misma posición que el de perfil) -->
     <TextView
         android:id="@+id/go_to_login_button"
         android:layout_width="wrap_content"
@@ -68,27 +67,28 @@
         android:visibility="visible"
         android:textColor="#5E4134"
         android:padding="8dp"
-        app:layout_constraintTop_toTopOf="@id/go_to_profile_button"
-        app:layout_constraintBottom_toBottomOf="@id/go_to_profile_button"
-        app:layout_constraintStart_toStartOf="@id/go_to_profile_button"
-        app:layout_constraintEnd_toEndOf="@id/go_to_profile_button" />
+        app:layout_constraintTop_toTopOf="@id/cart_button_container"
+        app:layout_constraintBottom_toBottomOf="@id/cart_button_container"
+        app:layout_constraintEnd_toStartOf="@id/cart_button_container" />
 
-    <!-- Título de la App (ahora ocupa el espacio restante) -->
+    <!-- Título de la App (ahora se ancla al elemento que esté visible) -->
     <TextView
         android:id="@+id/app_title"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="PANADERÍA DELICIA"
+        android:text="DELICIA's BAKERY"
         android:fontFamily="sans-serif-medium"
         android:textSize="24sp"
         android:textStyle="bold"
         android:paddingStart="16dp"
-        android:paddingEnd="16dp"
+        android:paddingEnd="8dp"
         android:textColor="#5E4134"
+        android:maxLines="1"
+        android:ellipsize="end"
         app:layout_constraintTop_toTopOf="@id/cart_button_container"
         app:layout_constraintBottom_toBottomOf="@id/cart_button_container"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/go_to_profile_button" />
+        app:layout_constraintEnd_toStartOf="@id/go_to_login_button" />
 
 
     <!-- RESTO DEL LAYOUT (Buscador, Filtros, RecyclerView...) -->
