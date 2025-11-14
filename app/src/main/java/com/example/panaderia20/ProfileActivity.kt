@@ -9,6 +9,7 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.ui.semantics.text
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
@@ -52,12 +53,15 @@ class ProfileActivity : AppCompatActivity() {
             logoutUser()
         }
 
+        // Listener para el botón de volver al catálogo
         btnBackToCatalog.setOnClickListener {
-            finish()
+            finish() // Simplemente cierra esta actividad para volver a la anterior
         }
 
         btnMyOrders.setOnClickListener {
-            Toast.makeText(this, "Función 'Ver mis pedidos' aún no implementada.", Toast.LENGTH_SHORT).show()
+            // Abre la nueva actividad que muestra la lista de pedidos
+            val intent = Intent(this, MyOrdersActivity::class.java)
+            startActivity(intent)
         }
     }
 
@@ -81,8 +85,8 @@ class ProfileActivity : AppCompatActivity() {
                 if (document != null && document.exists()) {
                     // Usamos la clase User que ya creamos
                     val userData = document.toObject(User::class.java)
-                    tvName.text = userData?.nombre
-                    tvPhone.text = userData?.telefono
+                    tvName.text = userData?.nombre ?: "Nombre no disponible"
+                    tvPhone.text = userData?.telefono ?: "Teléfono no disponible"
                 } else {
                     Toast.makeText(this, "No se encontraron datos del perfil.", Toast.LENGTH_SHORT).show()
                 }
@@ -94,6 +98,7 @@ class ProfileActivity : AppCompatActivity() {
     }
 
     private fun logoutUser() {
+        // Limpiar el carrito local antes de cerrar sesión
         CartManager.clearCart(this)
         auth.signOut()
         Toast.makeText(this, "Sesión cerrada", Toast.LENGTH_SHORT).show()
@@ -102,6 +107,7 @@ class ProfileActivity : AppCompatActivity() {
 
     private fun goToMainActivity() {
         val intent = Intent(this, MainActivity::class.java)
+        // Estas flags limpian el historial de actividades para que el usuario no pueda volver atrás
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(intent)
         finish()
