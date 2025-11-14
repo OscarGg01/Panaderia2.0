@@ -2,6 +2,7 @@ package com.example.panaderia20
 
 import com.google.firebase.firestore.ServerTimestamp
 import java.util.Date
+import com.google.firebase.firestore.DocumentId
 
 // Modelo para los productos DENTRO de un pedido
 // CORRECCIÓN: Propiedades cambiadas a 'var' y se añade un constructor vacío (implícito por los valores por defecto).
@@ -14,6 +15,8 @@ data class ProductoPedido(
 )
 
 data class Pedido(
+    @DocumentId
+    var id: String = "",
     var usuarioId: String = "",
     var telefonoPedido: String = "",
     @ServerTimestamp

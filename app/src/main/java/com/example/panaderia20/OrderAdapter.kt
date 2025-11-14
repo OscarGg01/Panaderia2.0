@@ -4,7 +4,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.compose.ui.semantics.text
 import androidx.recyclerview.widget.RecyclerView
+import java.util.TimeZone
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -34,9 +36,16 @@ class OrderAdapter(private val orders: List<Pedido>, private val onOrderClick: (
             totalTextView.text = String.format(Locale.getDefault(), "S/. %.2f", order.montoTotal)
             deliveryTypeTextView.text = "Entrega: ${order.entrega}"
 
+            if (order.estado == "Cancelado") {
+                statusTextView.setTextColor(itemView.context.getColor(android.R.color.holo_red_dark))
+            } else {
+                statusTextView.setTextColor(itemView.context.getColor(android.R.color.black))
+            }
+
             // Formatear la fecha
             order.fechaPedido?.let {
-                val formatter = SimpleDateFormat("dd MMM yyyy, HH:mm", Locale("es", "ES"))
+                val formatter = SimpleDateFormat("dd MMM yyyy, hh:mm a", Locale("es", "ES"))
+                formatter.timeZone = TimeZone.getTimeZone("GMT-5")
                 dateTextView.text = formatter.format(it)
             }
 
@@ -45,11 +54,13 @@ class OrderAdapter(private val orders: List<Pedido>, private val onOrderClick: (
                 "• ${it.cantidad} x ${it.nombre}"
             }
 
+            // Mueve la línea aquí para que esté con las demás asignaciones
+            productsTextView.text = productsString
+
+            // El listener siempre debe ir al final
             itemView.setOnClickListener {
                 onOrderClick(order)
             }
-
-            productsTextView.text = productsString
         }
     }
 }

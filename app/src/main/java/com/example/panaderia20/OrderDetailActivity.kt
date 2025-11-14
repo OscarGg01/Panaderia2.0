@@ -1,6 +1,7 @@
 package com.example.panaderia20
 
-import android.annotation.SuppressLint
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
@@ -10,24 +11,27 @@ import androidx.appcompat.widget.Toolbar
 import androidx.compose.ui.semantics.text
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
-import com.tbuonomo.viewpagerdotsindicator.WormDotsIndicator
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.gson.Gson
+import com.tbuonomo.viewpagerdotsindicator.WormDotsIndicator
+import java.util.Date
 import java.util.Locale
+import java.util.concurrent.TimeUnit
 
 class OrderDetailActivity : AppCompatActivity() {
 
     private lateinit var viewPager: ViewPager2
     private lateinit var wormDotsIndicator: WormDotsIndicator
     private lateinit var productListAdapter: ProductImageAdapter
-
-    // 1. Declara el RecyclerView y su adaptador
     private lateinit var rvDetailProductList: RecyclerView
     private lateinit var orderDetailProductAdapter: OrderDetailProductAdapter
-
     private lateinit var tvDetailTotal: TextView
     private lateinit var btnCancelOrder: Button
 
-    @SuppressLint("MissingInflatedId")
+    // 1. Añade una referencia a Firestore
+    private val db = FirebaseFirestore.getInstance()
+    private var currentOrder: Pedido? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_order_detail)
@@ -39,10 +43,7 @@ class OrderDetailActivity : AppCompatActivity() {
         // Vincular vistas
         viewPager = findViewById(R.id.product_image_viewpager)
         wormDotsIndicator = findViewById(R.id.worm_dots_indicator)
-
-        // 2. Vincula el RecyclerView
         rvDetailProductList = findViewById(R.id.rv_detail_product_list)
-
         tvDetailTotal = findViewById(R.id.tv_detail_total)
         btnCancelOrder = findViewById(R.id.btn_cancel_order)
 
@@ -53,26 +54,68 @@ class OrderDetailActivity : AppCompatActivity() {
             return
         }
 
-        val order = Gson().fromJson(orderJson, Pedido::class.java)
-        displayOrderDetails(order)
+        // Guardamos el pedido actual en una variable de la clase
+        currentOrder = Gson().fromJson(orderJson, Pedido::class.java)
+        currentOrder?.let { displayOrderDetails(it) }
 
+        // 2. Lógica del botón de cancelar
         btnCancelOrder.setOnClickListener {
-            Toast.makeText(this, "Función 'Cancelar Pedido' no implementada.", Toast.LENGTH_SHORT).show()
+            handleCancelOrder()
         }
     }
 
+    private fun handleCancelOrder() {
+        val order = currentOrder ?: return
+
+        // Si el pedido ya está cancelado, no hacer nada
+        if (order.estado == "Cancelado") {
+            Toast.makeText(this, "Este pedido ya ha sido cancelado.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val orderDate = order.fechaPedido ?: return
+        val currentDate = Date() // Hora actual
+
+        // Calcula la diferencia en milisegundos
+        val diffInMillis = currentDate.time - orderDate.time
+        // Convierte la diferencia a minutos
+        val diffInMinutes = TimeUnit.MILLISECONDS.toMinutes(diffInMillis)
+
+        // 3. Comprueba si han pasado menos de 10 minutos
+        if (diffInMinutes < 10) {
+            // Si está dentro del tiempo, procede a cancelar
+            cancelOrderInFirestore(order)
+        } else {
+            // Si ha pasado más tiempo, muestra un mensaje
+            Toast.makeText(this, "Solo puedes cancelar un pedido dentro de los primeros 10 minutos.", Toast.LENGTH_LONG).show()
+        }
+    }
+
+    private fun cancelOrderInFirestore(order: Pedido) {
+        // Usamos el ID del pedido que ahora tenemos en el modelo
+        db.collection("pedidos").document(order.id)
+            .update("estado", "Cancelado")
+            .addOnSuccessListener {
+                Toast.makeText(this, "Pedido cancelado con éxito.", Toast.LENGTH_SHORT).show()
+                // 4. Devolvemos un resultado a la actividad anterior para que se actualice
+                val resultIntent = Intent()
+                resultIntent.putExtra("ORDER_UPDATED", true)
+                setResult(Activity.RESULT_OK, resultIntent)
+                finish() // Cierra la pantalla de detalle
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(this, "Error al cancelar el pedido: ${e.message}", Toast.LENGTH_LONG).show()
+            }
+    }
+
     private fun displayOrderDetails(order: Pedido) {
-        // Configurar el ViewPager2 con las imágenes
+        // ... (el resto de esta función no cambia)
         productListAdapter = ProductImageAdapter(order.productos)
         viewPager.adapter = productListAdapter
         wormDotsIndicator.attachTo(viewPager)
-
-        // 3. Configura el RecyclerView de la lista de productos
-        rvDetailProductList.isNestedScrollingEnabled = false // Mejora el scroll dentro del ScrollView
+        rvDetailProductList.isNestedScrollingEnabled = false
         orderDetailProductAdapter = OrderDetailProductAdapter(order.productos)
         rvDetailProductList.adapter = orderDetailProductAdapter
-
-        // Mostrar el monto total
         tvDetailTotal.text = String.format(Locale.getDefault(), "Total: S/. %.2f", order.montoTotal)
     }
 
